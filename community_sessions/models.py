@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.cache import cache
 
 class Session(models.Model):
     title = models.CharField(max_length=255)
@@ -12,7 +13,16 @@ class Session(models.Model):
 
     @property
     def available_slots(self):
-        return self.capacity - self.reservations.count()
+        cache_key = f"available_slots_session_{self.id}"
+        slots = cache.get(cache_key)
+
+        if slots is None:
+            slots = self.capacity - self.reservations.count()
+            # Guardo en caché durante 20 segundos y evito hacer una query extra cada vez que quiero hacer count()
+            cache.set(cache_key, slots, timeout=20)
+
+        return slots
+        # return self.capacity - self.reservations.count()
 
 class Reservation(models.Model):
     session = models.ForeignKey(Session, related_name='reservations', on_delete=models.CASCADE)
