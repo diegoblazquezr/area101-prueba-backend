@@ -32,7 +32,12 @@ SECRET_KEY = "django-insecure-8x94czv#xnkau+fe-_i7c4^7t%jx%w41f$mh6e&2v@265!=(9-
 DEBUG = True
 # DEBUG = env.bool('DEBUG', default=False)
 SECRET_KEY = env('SECRET_KEY')
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'area101-prueba-backend.onrender.com',
+    'localhost',
+    '127.0.0.1',
+]
+
 
 
 # Application definition
