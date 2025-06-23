@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "community_sessions",
+    "drf_spectacular"
 ]
 
 MIDDLEWARE = [
@@ -159,4 +160,15 @@ LOGGING = {
             'level': 'DEBUG',  # Esto mostrará todas las consultas SQL en la consola
         },
     },
+}
+
+REST_FRAMEWORK = {
+    # Le dice a DRF que use spectacular como generador de esquemas
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Area101 API',
+    'DESCRIPTION': 'Documentación oficial de la API de sesiones de Area101.',
+    'VERSION': '1.0.0',
 }
