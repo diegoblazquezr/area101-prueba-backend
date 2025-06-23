@@ -10,8 +10,8 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
     # queryset = Session.objects.all().annotate(res_count=Count('reservations'))
     # Con prefetch_related evito una consulta por sesión cuando hago session.reservations.all() (o .count()).
     # queryset = Session.objects.all() \
-	# 	.annotate(res_count=Count('reservations')) \
-	# 	.prefetch_related('reservations')
+    #     .annotate(res_count=Count('reservations')) \
+    #     .prefetch_related('reservations')
     
     serializer_class = SessionSerializer
 
@@ -50,8 +50,19 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['post'])
     def reserve(self, request, pk=None):
         session = self.get_object()
+        
+        # Valido datos obligatorios antes del serializer
+        if not all(field in request.data for field in ("name", "email")):
+            return Response({'error': 'Faltan datos'}, status=400)
+
         if session.available_slots <= 0:
             return Response({'detail': 'No hay plazas disponibles'}, status=400)
+        
+        # Valido reserva duplicada por email
+        email = request.data.get('email')
+        if Reservation.objects.filter(session=session, email=email).exists():
+            return Response({'error': 'Ya tienes una reserva'}, status=400)
+        
         serializer = ReservationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(session=session)
