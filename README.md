@@ -13,58 +13,77 @@ Este proyecto es una API RESTful desarrollada para gestionar sesiones presencial
 - **Gunicorn** – Servidor WSGI usado en el despliegue.
 - **django-environ** – Gestión de variables de entorno desde `.env`.
 - **psycopg2-binary** – Driver PostgreSQL para Python.
-- **psycopg2-binary** – Driver PostgreSQL para Python.
 - **Git & GitHub** – Control de versiones.
 
-## Instalación
-Clona el repositorio:
+## ⚙️ Instalación
+Puedes acceder a la API a través de este enlace:
 
+- https://area101-prueba-backend.onrender.com/
+
+O si prefieres ejecutarlo en local, sigue estos pasos:
+
+1. Clona el repositorio en la carpeta que desees:
 ```
 git clone https://github.com/SergioLM7/back-django-area101/
 ```
-Navega al directorio del proyecto:
-
+2. Navega al directorio del proyecto:
 ```
 cd area101_prueba_backend
 ```
-Crea un entorno virtual:
+3. Asegúrate de tener instalado Python 3.8 o superior.  
 
+4. Crea un entorno virtual y actívalo:
 ```
 python -m venv env
-source myenv/bin/activate   # En Windows usa myenv\Scripts\activate
-```
-Instala las dependencias:
+source env/Scripts/activate   # En Windows Git Bash
+env/Scripts/activate          # En Windows PowerShell / CMD
+source env/bin/activate       # En MacOS y Linux
 
+```
+5. Instala las dependencias:
 ```
 pip install -r requirements.txt
 ```
-Ejecuta el servidor:
+6. Crea el archivo `.env` con las variables necesarias.
+```
+DEBUG=
+SECRET_KEY=
+
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+DB_SSLMODE=
+```
+7. Aplica las migraciones a la base de datos:
+```
+python manage.py migrate
+```
+8. Ejecuta el servidor:
 
 ```
 python manage.py runserver
 ```
 
-## 📚 Documentación
-
-Documentación interactiva generada automáticamente con `drf-spectacular`:
-- Accesible en `/docs/` tras el despliegue.
-
 ## 🔧 Funcionalidades principales
 
-### ➕ Listar sesiones activas
-`GET /api/sessions/`  
-Devuelve únicamente las sesiones con plazas disponibles.
+### - Listar sesiones activas
+`GET /api/sessions/` / `GET /api/sessions/?page=1`    
+Devuelve únicamente las sesiones con plazas disponibles, con paginación por parámetro page en la URL.
 
-### 🔍 Ver detalle de una sesión
+La respuesta incluye los campos count, next, previous y results con las sesiones de la página actual.
+
+### - Ver detalle de una sesión
 `GET /api/sessions/<id>/`  
 Muestra la información completa de la sesión, incluyendo reservas.
 
-### 📝 Reservar una plaza
+### - Reservar una plaza
 `POST /api/sessions/<id>/reserve/`  
 Permite reservar una plaza si hay disponibilidad.  
 Evita duplicados por email y controla el overbooking.
 
-### ❌ Cancelar una reserva
+### - Cancelar una reserva
 `POST /api/sessions/<id>/cancel/`  
 Cancela una reserva existente mediante el correo electrónico.
 
@@ -108,11 +127,14 @@ Estas pruebas aseguran la consistencia de la lógica de negocio, la gestión de 
 **Ubicación del archivo de pruebas:**  
 area101_prueba_backend/community_sessions/tests.py
 
+**Para probar los tests:**
+```
+python manage.py test
+```
+
 ## 📂 Estructura general del código
 
 - `models.py`: definición de `Session` y `Reservation`.
 - `views.py`: lógica de negocio, caché, validaciones y acciones personalizadas.
 - `serializers.py`: validación y transformación de datos.
 - `urls.py`: enrutamiento de endpoints API.
-
----
