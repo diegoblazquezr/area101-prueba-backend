@@ -5,7 +5,17 @@ from django.http import HttpResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 def home(request):
-    return HttpResponse("Bienvenido a Area101 API")
+    html = """
+    <h1>Bienvenido a Area101 API</h1>
+    <p>Enlaces útiles:</p>
+    <ul>
+        <li><a href="/api/schema/">Esquema OpenAPI (JSON)</a></li>
+        <li><a href="/api/docs/">Documentación Swagger UI</a></li>
+        <li><a href="/api/redoc/">Documentación ReDoc</a></li>
+        <li><a href="/api/sessions/">API Sesiones</a></li>
+    </ul>
+    """
+    return HttpResponse(html)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
