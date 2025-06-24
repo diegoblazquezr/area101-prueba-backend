@@ -136,6 +136,22 @@ python manage.py test
 
 - [Colección de Postman para pruebas de API](./readme/Area101.postman_collection.json)
 
+Pasos para importar la colección a Postman:
+
+1. Abre Postman.
+
+2. Haz clic en "Import".
+
+3. Puedes importar la colección de varias maneras:
+
+    - Archivo: selecciona la pestaña "Upload Files" y elige el archivo Area101.postman_collection.json ubicado en la carpeta readme/ del proyecto.
+
+    - Texto sin formato: copia el contenido del archivo .json y pégalo en la pestaña "Raw Text".
+
+    - URL: si la colección está disponible públicamente, puedes usar una URL desde la pestaña "Link".
+
+4. Haz clic en "Import" para añadirla a tu espacio de trabajo.
+
 
 ## 📂 Estructura general del código
 
