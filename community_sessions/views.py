@@ -50,18 +50,32 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['post'])
     def reserve(self, request, pk=None):
         session = self.get_object()
-        
-        # Valido datos obligatorios antes del serializer
-        if not all(field in request.data for field in ("name", "email")):
-            return Response({'error': 'Faltan datos'}, status=400)
 
-        if session.available_slots <= 0:
-            return Response({'detail': 'No hay plazas disponibles'}, status=400)
-        
         # Valido reserva duplicada por email
         email = request.data.get('email')
         if Reservation.objects.filter(session=session, email=email).exists():
-            return Response({'error': 'Ya tienes una reserva'}, status=400)
+            # return Response({'error': 'Ya tienes una reserva'}, status=400)
+            return Response({
+                'error': f'Ya existe una reserva con ese email ({email}) para esta sesión.'
+            }, status=400)
+
+        # Valido datos obligatorios antes del serializer
+        missing_fields = []
+        if 'name' not in request.data:
+            missing_fields.append('name')
+        if 'email' not in request.data:
+            missing_fields.append('email')
+
+        if missing_fields:
+            return Response({
+                'error': f'Faltan los siguientes campos obligatorios: {", ".join(missing_fields)}.'
+            }, status=400)
+
+        if session.available_slots <= 0:
+            # return Response({'detail': 'No hay plazas disponibles'}, status=400)
+            return Response({
+                'detail': f'No hay plazas disponibles para la sesión "{session.title}".'
+            }, status=400)
         
         serializer = ReservationSerializer(data=request.data)
         if serializer.is_valid():
@@ -75,7 +89,10 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
     def cancel(self, request, pk=None):
         email = request.data.get('email')
         if not email:
-            return Response({'detail': 'Email requerido'}, status=400)
+            # return Response({'detail': 'Email requerido'}, status=400)
+            return Response({
+                'detail': 'Campo "email" requerido para cancelar la reserva.'
+            }, status=400)
 
         session = self.get_object()
         try:
@@ -85,6 +102,10 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
             reservation.delete()
             # Limpio el caché justo antes de eliminar reserva
             cache.delete(f"available_slots_session_{session.id}")
-            return Response({'detail': 'Reserva cancelada'}, status=200)
+            # return Response({'detail': 'Reserva cancelada'}, status=200)
+            return Response({'detail': 'Reserva cancelada con éxito.'}, status=200)
         except Reservation.DoesNotExist:
-            return Response({'detail': 'No se encontró una reserva para ese email'}, status=404)
+            # return Response({'detail': 'No se encontró una reserva para ese email'}, status=404)
+            return Response({
+                'detail': f'No se encontró ninguna reserva con el email "{email}" para esta sesión.'
+            }, status=404)
