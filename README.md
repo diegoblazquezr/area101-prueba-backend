@@ -132,6 +132,11 @@ area101_prueba_backend/community_sessions/tests.py
 python manage.py test
 ```
 
+## 📫 Recursos adicionales
+
+- [Colección de Postman para pruebas de API](./readme/Area101.postman_collection.json)
+
+
 ## 📂 Estructura general del código
 
 - `models.py`: definición de `Session` y `Reservation`.
