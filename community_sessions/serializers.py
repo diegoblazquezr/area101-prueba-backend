@@ -13,6 +13,9 @@ class ReservationSerializer(serializers.ModelSerializer):
 class SessionSerializer(serializers.ModelSerializer):
     available_slots = serializers.IntegerField(read_only=True)
 
+    # Incluyo reservas actuales en el detalle
+    reservations = ReservationSerializer(many=True, read_only=True)
+
     class Meta:
         model = Session
         fields = '__all__'
