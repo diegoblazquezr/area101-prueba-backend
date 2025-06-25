@@ -1,9 +1,10 @@
+# views.py
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Count, F
 from .models import Session, Reservation
-from .serializers import SessionSerializer, ReservationSerializer
+from .serializers import SessionSerializer, ReservationSerializer, SessionDetailSerializer
 from django.core.cache import cache
 
 class SessionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -13,8 +14,8 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
     #     .annotate(res_count=Count('reservations')) \
     #     .prefetch_related('reservations')
     
-    serializer_class = SessionSerializer
-
+    serializer_class = SessionSerializer  # <-- Base serializer sin reservas
+    
     # def get_queryset(self):
     #     return self.queryset.filter(res_count__lt=F('capacity'))
     # def get_queryset(self):
@@ -23,6 +24,7 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
     #     ).prefetch_related('reservations').filter(
     #         res_count__lt=F('capacity')
     #     )
+
     def get_queryset(self):
         qs = Session.objects.annotate(
             res_count=Count('reservations')
@@ -34,6 +36,12 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
 
         return qs
     
+    # Nuevo método para devolver diferentes serializers según acción
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return SessionDetailSerializer  # En detalle, con reservas
+        return SessionSerializer  # En listado, sin reservas (o con reservations si quieres, puedes quitar reservations de SessionSerializer)
+
     def retrieve(self, request, *args, **kwargs):
         session_id = kwargs['pk']
         cache_key = f"session_{session_id}_data"
