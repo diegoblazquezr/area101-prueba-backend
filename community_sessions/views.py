@@ -1,4 +1,3 @@
-# views.py
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -90,6 +89,7 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
             serializer.save(session=session)
             # Limpio el caché justo antes de guardar reserva
             cache.delete(f"available_slots_session_{session.id}")
+            cache.delete("sessions_list_data")  # <- invalido caché del listado general
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
@@ -110,6 +110,7 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
             reservation.delete()
             # Limpio el caché justo antes de eliminar reserva
             cache.delete(f"available_slots_session_{session.id}")
+            cache.delete("sessions_list_data")  # <- invalida caché del listado general
             # return Response({'detail': 'Reserva cancelada'}, status=200)
             return Response({'detail': 'Reserva cancelada con éxito.'}, status=200)
         except Reservation.DoesNotExist:
@@ -117,3 +118,17 @@ class SessionViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({
                 'detail': f'No se encontró ninguna reserva con el email "{email}" para esta sesión.'
             }, status=404)
+
+    # Cacheo GET LIST
+    def list(self, request, *args, **kwargs):
+        # Construyo una clave de caché que incluya los query params (paginación, orden, etc.)
+        query_string = request.META.get('QUERY_STRING', '')
+        cache_key = f"sessions_list_data::{query_string or 'default'}"
+        
+        cached_response = cache.get(cache_key)
+        if cached_response:
+            return Response(cached_response)
+
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response.data, timeout=10) 
+        return response
